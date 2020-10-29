@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>画个地球</title>
+    <!-- <script src="../three.js"></script> -->
+    <script src="assets/plus/threejs/three.min.js"></script>
+    <script src="assets/plus/threejs/js/controls/OrbitControls.js"></script>
+    <script src="assets/plus/threejs/js/renderers/CSS2DRenderer.js"></script>
+    <script src="assets/plus/threejs/js/libs/stats.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0px;
+        }
+
+        #canvas-frame {
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .star-name {
+            color: #FFF;
+            padding: 2px;
+            background: rgba( 0, 0, 0, .6 );
+        }
+    </style>
+</head>
+
+<body>
+    <div id="canvas-frame"></div>
+    <img src="./assets/earth.jpg" alt="">
+</body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        threeStart();
+    })
+
+    function threeStart() {
+	    initThree();
+	    initStats();
+	    initCamera();
+	    initScene();
+	    initLight();
+	    initEarth();
+	    initClouds();
+	    initControls();
+
+	    animate();
+    }
+
+    function animate() {
+	    controls.update();
+	    stats.update();
+
+	    earthMesh.rotation.y += 0.002;
+	    cloudsMesh.rotation.y -= 0.002;
+	    cloudsMesh.rotation.z += 0.002;
+	    cloudsMesh.rotation.x += 0.001;
+
+	    renderer.render(scene, camera);
+	    labelRenderer.render(scene, camera);
+	    requestAnimationFrame(animate);
+    }
+
+    // 场景
+    var scene;
+    function initScene() {
+	    scene = new THREE.Scene();
+    }
+
+    // 相机
+    var camera;
+    function initCamera() {
+	    // camera = new THREE.OrthographicCamera(window.innerWidth / 2, window.innerWidth / -2, window.innerHeight/ 2, window.innerHeight/ -2, 0.1, 1000);
+
+	    camera = new THREE.PerspectiveCamera(90, width / height, 0.1, 10000);
+        camera.position.x = 0;
+        camera.position.y = 1000;
+        camera.position.z = 1500;
+        camera.lookAt({ x: 0, y: 0, z: 0 });
+    }
+
+    // 球
+    var earthMesh;
+    function initEarth() {
+	    var earthGeo = new THREE.SphereGeometry(1000, 100, 100);
+	    var earthMater = new THREE.MeshBasicMaterial({
+		    //color: '#69c0ff',
+		    map: new THREE.TextureLoader().load('./assets/earth.jpg'),
+		    // side: THREE.DoubleSide,
+	    });
+
+	    earthMesh = new THREE.Mesh(earthGeo, earthMater);
+
+	    // 标签
+	    var earthDiv = document.createElement( 'span' );
+	    earthDiv.className = 'star-name';
+	    earthDiv.textContent = 'Earth';
+	    earthDiv.style.marginTop = '-1em';
+	    var earthLabel = new THREE.CSS2DObject( earthDiv );
+	    earthLabel.position.set( 0, 1100, 0 );
+	    earthMesh.add( earthLabel );
+
+	    scene.add(earthMesh);
+    }
+
+    // 云
+    var cloudsMesh;
+    function initClouds() {
+	    var cloudsGeo = new THREE.SphereGeometry(1030, 100, 100);
+	    var cloudsMater = new THREE.MeshPhongMaterial({
+		    alphaMap: new THREE.TextureLoader().load('./assets/clouds.jpg'),
+		    transparent: true,
+		    opacity: 0.8
+	    });
+	    cloudsMesh = new THREE.Mesh(cloudsGeo, cloudsMater);
+	    scene.add(cloudsMesh);
+    }
+
+    // 光源
+    var light;
+    function initLight() {
+
+        // 半球光，颜色从天空颜色渐变为地面颜色。
+        /*var light = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);*/
+
+        // 环境光
+        light = new THREE.AmbientLight("#fff");
+        light.position.set(100, 100, 200);
+
+        // 平行光
+        /*light = new THREE.DirectionalLight(0xffffbb, 1);
+        light.position.set(1, 0.2, 0.5);*/
+
+	    // 聚光灯
+	    /*var light = new THREE.SpotLight( 0xffffff );
+	    light.position.set( 0, 1600, 0 );
+	    light.castShadow = true;
+	    light.shadow.mapSize.width = 1024;
+	    light.shadow.mapSize.height = 1024;
+	    light.shadow.camera.near = 190;
+	    light.shadow.camera.far = 1000;
+	    light.shadow.camera.fov = 20;*/
+
+        scene.add(light);
+    }
+
+    // 渲染器
+    var renderer;
+    var labelRenderer;
+    function initThree() {
+	    width = document.getElementById('canvas-frame').clientWidth;
+	    height = document.getElementById('canvas-frame').clientHeight;
+
+	    // 标签渲染
+	    labelRenderer = new THREE.CSS2DRenderer();
+	    labelRenderer.setSize( width, height );
+	    labelRenderer.domElement.style.position = 'absolute';
+	    labelRenderer.domElement.style.top = 0;
+	    document.getElementById('canvas-frame').appendChild( labelRenderer.domElement );
+
+	    renderer = new THREE.WebGLRenderer({
+		    antialias: true, // 抗锯齿
+		    alpha: true, // 透明度
+	    });
+	    renderer.setSize(width, height);
+	    document.getElementById('canvas-frame').appendChild(renderer.domElement);
+	    renderer.setClearColor('#000', 1.0);
+    }
+
+    // 控制器
+    var controls;
+    var labelControls;
+    function initControls() {
+	    controls = new THREE.OrbitControls(camera, renderer.domElement);
+	    labelControls = new THREE.OrbitControls( camera, labelRenderer.domElement );
+	    renderer.clear();
+	    controls.update();
+	    labelControls.update();
+    }
+
+    // 性能
+    var stats;
+    function initStats() {
+	    stats = new Stats();
+	    document.getElementById('canvas-frame').appendChild(stats.dom);
+    }
+
+</script>
+
+</html>

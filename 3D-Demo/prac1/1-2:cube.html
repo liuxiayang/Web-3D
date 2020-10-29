@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <style>
+        canvas { width: 100%; height: 100% }
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: url("./outside.jpeg") center no-repeat;
+            background-size:cover;
+        }
+    </style>
+    <script src="js/three.js"></script>
+
+</head>
+<body>
+    <script>
+        var scene = new THREE.Scene();
+		
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+		
+        var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        var geometry = new THREE.CubeGeometry(1,1,1);
+        var material = new THREE.MeshBasicMaterial({color: '#69c0ff'});
+
+        var Physica = new THREE.MeshPhongMaterial({
+	        color: 0xccddff,
+	        // 材质像金属的程度. 非金属材料，如木材或石材，使用0.0，金属使用1.0，中间没有（通常）.
+	        // 默认 0.5. 0.0到1.0之间的值可用于生锈的金属外观
+	        // metalness: 1.0,
+	        // 材料的粗糙程度. 0.0表示平滑的镜面反射，1.0表示完全漫反射. 默认 0.5
+	        roughness: 0.6,
+	        // 设置环境贴图
+	        envMap: 0.5,
+	        refractionRatio: 0.9,
+	        reflectivity: 0.9,
+	        // 反射程度, 从 0.0 到1.0.默认0.5.
+	        // 这模拟了非金属材料的反射率。 当metalness为1.0时无效
+	        // reflectivity: 0.5,
+        })
+
+        var cube = new THREE.Mesh(geometry, Physica);
+        scene.add(cube);
+        camera.position.z = 5;
+        function render() {
+            requestAnimationFrame(render);
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+        render();
+    </script>
+</body>
+</html>

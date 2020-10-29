@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>sss</title>
+    <script src="../three-earth/assets/plus/threejs/three.min.js"></script>
+    <script src="../three-earth/assets/plus/threejs/js/controls/OrbitControls.js"></script>
+    <script src="../three-earth/assets/plus/threejs/js/libs/stats.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0px;
+        }
+
+        #canvas-frame {
+            border: none;
+            background-color: #000;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+<!-- 存放canvas的容器 -->
+<canvas id="mycanvas"></canvas>
+
+<div id="canvas-frame">
+</div>
+</body>
+
+<script>
+	var canvas = document.getElementById('mycanvas');
+	var context = canvas.getContext('2d');
+	var img = new Image();
+	var picData;
+
+	window.onload = function(){
+		img.crossOrigin = 'anonymous';
+		img.src = './demoPic.png';
+		img.onload = function () {
+			// console.log(img.width, img.height);
+
+			canvas.width = img.width;
+			canvas.height = img.height;
+			context.drawImage(this, 0, 0);
+			picData = context.getImageData(0, 0, this.width, this.height);
+			canvas.style.display = "none";
+			console.log(picData);
+
+			init();
+
+			// animate();
+			// getImageData(img)
+		};
+	}
+
+    // document.getElementById('t-img').src = './demoPic.png';
+
+    function getImageData (img) {
+	    console.log(img.width, img.height);
+	    canvas.width = img.width;
+	    canvas.height = img.height;
+	    context.drawImage(this, 0, 0);
+	    picData = context.getImageData(0, 0, this.width, this.height);
+	    // canvas.style.display = "none"
+    }
+
+
+	let scene, camera, renderer, controls;
+	let stats = initStats();
+
+	// 场景
+	function initScene() {
+		scene = new THREE.Scene();
+	}
+
+	// 相机
+	function initCamera() {
+		// camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+		camera = new THREE.OrthographicCamera(window.innerWidth / 2, window.innerWidth / -2, window.innerHeight/ 2, window.innerHeight/ -2, 0.1, 1000);
+		camera.position.set(40, -80, 200);
+		camera.lookAt(new THREE.Vector3(0, 0, 0));
+		// scene.add(camera)
+	}
+
+	// 渲染器
+	function initRender() {
+		renderer = new THREE.WebGLRenderer({ antialias: true }); // 抗锯齿
+		renderer.setSize(window.innerWidth, window.innerHeight);
+		// renderer.setClearColor(new THREE.Color('#fff'));
+		document.body.appendChild(renderer.domElement);
+	}
+
+	// 灯光
+	function initLight() {
+
+	}
+
+	// 控制器
+	function initControls() {
+		controls = new THREE.OrbitControls(camera, renderer.domElement);
+	}
+
+	// pic
+	function initContent() {
+		var starsGeometry = new THREE.Geometry();
+
+		for (let y = 0, y2 = picData.height; y < y2; y += 1) {
+			for (let x = 0, x2 = picData.width; x < x2; x += 1) {
+				if (picData.data[x * 4 + y * 4 * picData.width] > 0) {
+					let tempNum = x * 4 + y * 4 * picData.width;
+					var star = new THREE.Vector3();
+					star.x = x - picData.width / 2; // x轴居中
+					star.y = -(y - picData.height / 2); // y轴居中
+					star.z = -Math.random() * 500; // z随机
+					// star.z = 0
+
+					var color = 'rgb(' + picData.data[tempNum] + ',' + picData.data[tempNum + 1] + ',' + picData.data[tempNum + 2] + ')'
+                    starsGeometry.colors.push(new THREE.Color(color));
+					starsGeometry.vertices.push(star);
+				}
+			}
+		}
+
+		let material = new THREE.PointsMaterial({
+			size: 1,
+			vertexColors: THREE.VertexColors,
+			transparent: true,
+			opacity: 1,
+			sizeAttenuation: false,
+            //map 贴图
+		});
+
+		// var starsMaterial = new THREE.PointsMaterial( starsGeometry.colors );
+
+		var starField = new THREE.Points(starsGeometry, material);
+
+		scene.add( starField );
+	}
+
+	/* 性能插件 */
+	function initStats() {
+
+		let stats = new Stats();
+
+		document.body.appendChild(stats.domElement);
+
+		return stats;
+
+	}
+
+	/* 窗口变动触发 */
+	function onWindowResize() {
+
+		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.updateProjectionMatrix();
+		renderer.setSize(window.innerWidth, window.innerHeight);
+
+	}
+
+	/* 数据更新 */
+	function update() {
+
+		stats.update();
+
+	}
+
+	/* 初始化 */
+	function init() {
+		console.log(picData);
+		initScene();
+		initCamera();
+		initRender();
+		initLight();
+		initControls();
+		initContent();
+		animate();
+
+		/* 监听事件 */
+		window.addEventListener('resize', onWindowResize, false);
+
+	}
+
+	/* 循环渲染 */
+	function animate() {
+		if(camera.position.x > -0.001 && camera.position.x < 0.001 && camera.position.y > -0.001 && camera.position.y < 0.001){
+			camera.position.x = 0;
+			camera.position.y = 0;
+			return
+        } else {
+			camera.position.x += (0 - camera.position.x)*0.04;
+			camera.position.y += (0 - camera.position.y)*0.04;
+        }
+		//camera.position.y = camera.position.y + 1;
+		// console.log(camera.position);
+		camera.lookAt(new THREE.Vector3(0, 0, 0));
+		renderer.render(scene, camera);
+		requestAnimationFrame(animate);
+
+	}
+
+	/* 初始加载 */
+	/*(function () {
+		console.log("three init start...");
+
+		init();
+		animate();
+
+		console.log("three init send...");
+	})();*/
+
+
+</script>
+
+</html>

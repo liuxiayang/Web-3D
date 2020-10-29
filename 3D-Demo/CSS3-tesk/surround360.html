@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+    body{
+        margin: 0;
+        padding: 0;
+    }
+    .scene {
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+        text-align: center;
+        perspective: 1000px;
+        perspective-origin: 50% 50%;
+    }
+
+    .carousel {
+        position: absolute;
+        width: 200px;
+        height: 100px;
+        top: 50%;
+        left:50%;
+        transform: translateX(-100px) translateY(-50px) /*translateZ(1000px)*/;
+        transform-style: preserve-3d;
+        animation: pieceRotate 5s;
+        background-color: rgba(0,255,255,0.8);
+    }
+
+    @keyframes pieceRotate
+    {
+        0%   {-webkit-transform: rotateY(0deg);
+            -ms-transform: rotateY(0deg);
+            -o-transform: rotateY(0deg);
+            transform: translateX(-100px) translateY(-50px) translateZ(1000px) rotateY(0deg)}
+        100% {-webkit-transform: rotateY(360deg);
+            -ms-transform: rotateY(360deg);
+            -o-transform: rotateY(360deg);
+            transform: translateX(-100px) translateY(-50px) translateZ(1000px) rotateY(360deg)}
+    }
+
+    .carousel__cell {
+        position: absolute;
+        width: 200px;
+        height: 100px;
+        background-color: rgb(135, 208, 104, 0.8);
+        line-height: 100px;
+    }
+
+    .carousel__cell:nth-child(1) { transform: rotateY(  0deg) translateZ(383px); }
+    .carousel__cell:nth-child(2) { transform: rotateY( 30deg) translateZ(383px); }
+    .carousel__cell:nth-child(3) { transform: rotateY( 60deg) translateZ(383px); }
+    .carousel__cell:nth-child(4) { transform: rotateY(90deg) translateZ(383px); }
+    .carousel__cell:nth-child(5) { transform: rotateY(120deg) translateZ(383px); }
+    .carousel__cell:nth-child(6) { transform: rotateY(150deg) translateZ(383px); }
+    .carousel__cell:nth-child(7) { transform: rotateY(180deg) translateZ(383px); }
+    .carousel__cell:nth-child(8) { transform: rotateY(210deg) translateZ(383px); }
+    .carousel__cell:nth-child(9) { transform: rotateY(240deg) translateZ(383px); }
+    .carousel__cell:nth-child(10) { transform: rotateY(270deg) translateZ(383px); }
+    .carousel__cell:nth-child(11) { transform: rotateY(300deg) translateZ(383px); }
+    .carousel__cell:nth-child(12) { transform: rotateY(330deg) translateZ(383px); }
+</style>
+<body>
+<div class="scene">
+    <div class="stage">
+        <div class="carousel">
+            <div class="carousel__cell">1</div>
+            <div class="carousel__cell">2</div>
+            <div class="carousel__cell">3</div>
+            <div class="carousel__cell">4</div>
+            <div class="carousel__cell">5</div>
+            <div class="carousel__cell">6</div>
+            <div class="carousel__cell">7</div>
+            <div class="carousel__cell">8</div>
+            <div class="carousel__cell">9</div>
+            <div class="carousel__cell">10</div>
+            <div class="carousel__cell">11</div>
+            <div class="carousel__cell">12</div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    function calTranslateZ(opts) {
+		return Math.round(opts.width / (2 * Math.tan(Math.PI / opts.number)))
+	}
+
+    console.log(calTranslateZ(opts = {
+	    width: 200,
+	    number: 12
+    }))
+	/*calTranlateZ({
+		width: 200,
+		number: 12
+	})*/
+
+</script>
+</html>
+
